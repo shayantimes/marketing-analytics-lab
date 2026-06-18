@@ -1,19 +1,22 @@
 from datetime import date
+from typing import Optional
+
 from pydantic import BaseModel
 
 
-class CampaignRecord(BaseModel):
+class MarketingRecord(BaseModel):
+
     date: date
 
     source: str
 
     campaign_name: str
 
-    impressions: int
-    clicks: int
+    impressions: Optional[float] = None
+    clicks: Optional[float] = None
 
-    cost: float
+    cost: Optional[float] = None
 
-    conversions: float
+    conversions: Optional[float] = None
 
-    revenue: float
+    revenue: Optional[float] = None

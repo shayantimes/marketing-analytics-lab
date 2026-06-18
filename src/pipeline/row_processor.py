@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 
 from src.cleaning.mappers import map_row
 from src.cleaning.cleaners import clean_number, clean_string, clean_date
@@ -6,23 +6,24 @@ from src.contracts.validator import validate_record
 from src.models.errors import RowError
 
 
-numeric_fields = [
+NUMERIC_FIELDS = {
     "cost",
     "clicks",
     "impressions",
     "conversions",
     "revenue",
-]
+}
 
 
-def process_row(row: Dict, mapping: Dict, row_index: int, source: str) -> Dict:
+def process_row(
+    row: Dict[str, Any],
+    mapping: Dict[str, str],
+    row_index: int,
+    source: str,
+    schema: Any,
+) -> Dict:
     """
-    Process a single CSV row into canonical record.
-
-    Steps:
-        1. MAP
-        2. CLEAN
-        3. VALIDATE
+    Single-row canonical transformation pipeline.
     """
 
     # 1. MAP
@@ -33,7 +34,7 @@ def process_row(row: Dict, mapping: Dict, row_index: int, source: str) -> Dict:
 
     for key, value in mapped.items():
 
-        if key in numeric_fields:
+        if key in NUMERIC_FIELDS:
             cleaned[key] = clean_number(value)
 
         elif key == "date":
@@ -45,16 +46,16 @@ def process_row(row: Dict, mapping: Dict, row_index: int, source: str) -> Dict:
         else:
             cleaned[key] = value
 
-    # 🔥 IMPORTANT: inject BEFORE validation
+    # 3. ENRICH
     cleaned["source"] = source
 
-    # 3. VALIDATE
-    is_valid, errors = validate_record(cleaned)
+    # 4. VALIDATE
+    is_valid, errors = validate_record(cleaned, schema)
 
     if is_valid:
         return {
             "valid": True,
-            "data": cleaned
+            "data": cleaned,
         }
 
     return {
@@ -62,6 +63,6 @@ def process_row(row: Dict, mapping: Dict, row_index: int, source: str) -> Dict:
         "error": RowError(
             row_index=row_index,
             errors=errors,
-            raw_row=row
-        )
+            raw_row=row,
+        ),
     }

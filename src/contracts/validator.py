@@ -1,10 +1,15 @@
-from src.contracts.canonical_schema import CampaignRecord
 from pydantic import ValidationError
 
 
-def validate_record(record: dict):
+def validate_record(record: dict, schema):
+    """
+    Validate a record against a given Pydantic schema.
+    Returns:
+        (is_valid: bool, errors: list | None)
+    """
+
     try:
-        CampaignRecord(**record)
+        schema(**record)
         return True, None
 
     except ValidationError as e:

@@ -1,17 +1,18 @@
 import csv
 
 from src.pipeline.row_processor import process_row
-from src.mappings.registry import MAPPINGS
+from src.mappings.registry import MAPPINGS, SCHEMAS
 
 
 def process_csv(file_path: str, source: str):
     """
-    Process full CSV file into canonical dataset
+    Batch ingestion orchestrator.
     """
 
-    mapping = MAPPINGS.get(source)
-
-    if not mapping:
+    try:
+        mapping = MAPPINGS[source]
+        schema = SCHEMAS[source]
+    except KeyError:
         raise ValueError(f"Unknown source: {source}")
 
     valid_rows = []
@@ -22,7 +23,13 @@ def process_csv(file_path: str, source: str):
 
         for i, row in enumerate(reader):
 
-            result = process_row(row, mapping, i, source)
+            result = process_row(
+                row=row,
+                mapping=mapping,
+                row_index=i,
+                source=source,
+                schema=schema,
+            )
 
             if result["valid"]:
                 valid_rows.append(result["data"])
@@ -36,5 +43,5 @@ def process_csv(file_path: str, source: str):
             "total": len(valid_rows) + len(errors),
             "valid": len(valid_rows),
             "invalid": len(errors),
-        }
+        },
     }

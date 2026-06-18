@@ -1,34 +1,28 @@
-import argparse
-
 from src.pipeline.batch_processor import process_csv
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Run Marketing Analytics Pipeline")
-
-    parser.add_argument("--file", required=True, help="Path to CSV file")
-    parser.add_argument("--source", required=True, help="Data source (e.g. google_ads, meta_ads)")
-
-    args = parser.parse_args()
-
+def run_test():
     result = process_csv(
-        file_path=args.file,
-        source=args.source
+        file_path="data/sample_google_ads_campaign.csv",
+        source="google_ads",
     )
 
-    print("\n===== PIPELINE RESULT =====\n")
-    print(f"TOTAL ROWS: {result['summary']['total']}")
-    print(f"VALID: {result['summary']['valid']}")
-    print(f"INVALID: {result['summary']['invalid']}")
+    print("\n===== PIPELINE TEST =====\n")
 
-    print("\n===== SAMPLE VALID ROWS =====\n")
-    for row in result["valid_rows"][:3]:
+    summary = result["summary"]
+
+    print(f"TOTAL: {summary['total']}")
+    print(f"VALID: {summary['valid']}")
+    print(f"INVALID: {summary['invalid']}")
+
+    print("\n--- VALID ROWS ---\n")
+    for row in result["valid_rows"]:
         print(row)
 
-    print("\n===== ERRORS =====\n")
-    for err in result["errors"][:3]:
+    print("\n--- ERRORS ---\n")
+    for err in result["errors"]:
         print(err)
 
 
 if __name__ == "__main__":
-    main()
+    run_test()

@@ -1,9 +1,9 @@
-MAPPING = {
-    "Date": "date",
-    "Campaign Name": "campaign_name",
-    "Impressions": "impressions",
-    "Clicks": "clicks",
-    "Amount Spent": "cost",
-    "Conversions": "conversions",
-    "Revenue": "revenue",
+META_ADS_MAPPING = {
+    "date": "date",
+    "campaign_name": "campaign_name",
+    "impressions": "impressions",
+    "clicks": "clicks",
+    "cost": "cost",
+    "conversions": "conversions",
+    "revenue": "revenue",
 }
