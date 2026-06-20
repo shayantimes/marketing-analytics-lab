@@ -3,7 +3,7 @@ from typing import Dict, Any
 from src.cleaning.mappers import map_row
 from src.cleaning.cleaners import clean_number, clean_string, clean_date
 from src.contracts.validator import validate_record
-from src.models.errors import StructuredError
+from src.models.errors import StructuredError, RowError
 from src.observability.logger import log_row_trace
 from src.observability.error_classifier import classify_error
 
@@ -145,13 +145,16 @@ def process_row(
     # =========================
     # 6. RESULT
     # =========================
-    if is_valid and len(structured_errors) == 0:
+    if is_valid and len(all_errors) == 0:
         return {
             "valid": True,
             "data": cleaned,
-        }
+    }
 
     return {
-    "valid": False,
-    "errors": all_errors,
+        "valid": False,
+        "error": RowError(
+            row_index=row_index,
+            errors=all_errors,
+        )
 }
