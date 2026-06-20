@@ -7,5 +7,8 @@ handler = logging.StreamHandler()
 logger.addHandler(handler)
 
 
-def log_row(index, status, info=None):
-    logger.info(f"[ROW {index}] {status} {info or ''}")
+def log_row_trace(row_index: int, stage: str, status: str, details=None):
+    print(f"[ROW {row_index}] {stage.upper()} → {status}")
+
+    if details:
+        print(f"   └─ {details}")

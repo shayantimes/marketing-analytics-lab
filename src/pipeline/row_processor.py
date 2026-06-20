@@ -3,7 +3,9 @@ from typing import Dict, Any
 from src.cleaning.mappers import map_row
 from src.cleaning.cleaners import clean_number, clean_string, clean_date
 from src.contracts.validator import validate_record
-from src.models.errors import RowError
+from src.models.errors import StructuredError
+from src.observability.logger import log_row_trace
+from src.observability.error_classifier import classify_error
 
 
 NUMERIC_FIELDS = {
@@ -23,46 +25,133 @@ def process_row(
     schema: Any,
 ) -> Dict:
     """
-    Single-row canonical transformation pipeline.
+    Single-row canonical transformation pipeline:
+    MAP → CLEAN → VALIDATE + OBSERVABILITY
     """
 
-    # 1. MAP
-    mapped = map_row(row, mapping)
+    structured_errors = []
 
+    # =========================
+    # 1. MAP
+    # =========================
+    log_row_trace(row_index, "mapping", "start")
+    mapped = map_row(row, mapping)
+    log_row_trace(row_index, "mapping", "ok")
+
+    # =========================
     # 2. CLEAN
+    # =========================
     cleaned = {}
 
     for key, value in mapped.items():
 
+        # ---- numeric fields ----
         if key in NUMERIC_FIELDS:
-            cleaned[key] = clean_number(value)
+            try:
+                cleaned[key] = clean_number(value)
 
+            except Exception as e:
+                structured_errors.append(
+                    StructuredError(
+                        row_index=row_index,
+                        field=key,
+                        message=str(e),
+                        error_type="CLEANING",
+                        stage="clean",
+                        raw_value=value,
+                        raw_row=row,
+                    )
+                )
+                cleaned[key] = None
+
+        # ---- date ----
         elif key == "date":
-            cleaned[key] = clean_date(value)
+            try:
+                cleaned[key] = clean_date(value)
 
+            except Exception as e:
+                structured_errors.append(
+                    StructuredError(
+                        row_index=row_index,
+                        field=key,
+                        message=str(e),
+                        error_type="CLEANING",
+                        stage="clean",
+                        raw_value=value,
+                        raw_row=row,
+                    )
+                )
+                cleaned[key] = None
+
+        # ---- string ----
         elif key == "campaign_name":
-            cleaned[key] = clean_string(value)
+            try:
+                cleaned[key] = clean_string(value)
 
+            except Exception as e:
+                structured_errors.append(
+                    StructuredError(
+                        row_index=row_index,
+                        field=key,
+                        message=str(e),
+                        error_type="CLEANING",
+                        stage="clean",
+                        raw_value=value,
+                        raw_row=row,
+                    )
+                )
+                cleaned[key] = None
+
+        # ---- passthrough ----
         else:
             cleaned[key] = value
 
+    # =========================
     # 3. ENRICH
+    # =========================
     cleaned["source"] = source
 
+    # =========================
     # 4. VALIDATE
-    is_valid, errors = validate_record(cleaned, schema)
+    # =========================
+    log_row_trace(row_index, "validation", "start")
 
-    if is_valid:
+    is_valid, validation_errors = validate_record(cleaned, schema)
+
+    log_row_trace(
+        row_index,
+        "validation",
+        "ok" if is_valid else "failed"
+    )
+
+    # =========================
+    # 5. MERGE ERRORS
+    # =========================
+    all_errors = list(structured_errors)
+
+    for e in (validation_errors or []):
+        all_errors.append(
+            StructuredError(
+                row_index=row_index,
+                field=e.get("loc", [None])[0] if isinstance(e, dict) else None,
+                message=e.get("msg") if isinstance(e, dict) else str(e),
+                error_type="VALIDATION",
+                stage="validate",
+                raw_value=None,
+                raw_row=row,
+            )
+        )
+
+    # =========================
+    # 6. RESULT
+    # =========================
+    if is_valid and len(structured_errors) == 0:
         return {
             "valid": True,
             "data": cleaned,
         }
 
     return {
-        "valid": False,
-        "error": RowError(
-            row_index=row_index,
-            errors=errors,
-            raw_row=row,
-        ),
-    }
+    "valid": False,
+    "errors": all_errors,
+}

@@ -3,7 +3,7 @@ from src.pipeline.batch_processor import process_csv
 
 def run_test():
     result = process_csv(
-        file_path="data/sample_google_ads_campaign.csv",
+        file_path="data/invalid_numbers.csv",
         source="google_ads",
     )
 

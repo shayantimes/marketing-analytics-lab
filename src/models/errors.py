@@ -1,8 +1,13 @@
-from pydantic import BaseModel
-from typing import List, Any
+from dataclasses import dataclass
+from typing import Any, Optional
 
 
-class RowError(BaseModel):
+@dataclass
+class StructuredError:
     row_index: int
-    errors: List[Any]
+    field: Optional[str]
+    message: str
+    error_type: str          # CLEANING / VALIDATION / MAPPING
+    stage: str               # map / clean / validate
+    raw_value: Any
     raw_row: dict

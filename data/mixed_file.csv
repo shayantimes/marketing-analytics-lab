@@ -1,0 +1,6 @@
+Date,Campaign,Impressions,Clicks,Cost,Conversions,Conversion Value
+
+2026-05-01,Good Campaign,10000,500,250,20,1500
+banana,Bad Date,10000,500,250,20,1500
+2026-05-03,Bad Number,abc,500,250,20,1500
+2026-05-04,Good Campaign 2,12000,600,300,25,1800

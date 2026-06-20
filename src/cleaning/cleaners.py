@@ -2,19 +2,19 @@
 
 # Numeric cleaning
 def clean_number(value):
-    if value is None:
-        return None
+    try:
+        if value is None:
+            return None
 
-    if isinstance(value, (int, float)):
-        return value
+        value = str(value).strip().replace(",", "")
 
-    value = str(value).strip()
-    value = value.replace(",", "")
+        if value == "":
+            return None
 
-    if value == "":
-        return None
+        return float(value)
 
-    return float(value)
+    except Exception:
+        raise ValueError(f"Invalid number: {value}")
 
 # String cleaning
 def clean_string(value):

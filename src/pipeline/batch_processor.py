@@ -34,7 +34,7 @@ def process_csv(file_path: str, source: str):
             if result["valid"]:
                 valid_rows.append(result["data"])
             else:
-                errors.append(result["error"])
+                errors.extend(result["errors"])
 
     return {
         "valid_rows": valid_rows,
