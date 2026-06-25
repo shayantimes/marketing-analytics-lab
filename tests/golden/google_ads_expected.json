@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2026-05-01",
+    "source": "google_ads",
+    "campaign_name": "Brand Search",
+    "impressions": 10000.0,
+    "clicks": 500.0,
+    "cost": 250.0,
+    "conversions": 20.0,
+    "revenue": 1500.0
+  }
+]

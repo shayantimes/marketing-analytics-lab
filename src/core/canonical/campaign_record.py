@@ -1,21 +1,17 @@
-from dataclasses import dataclass
 from datetime import date
+from typing import Optional
+from pydantic import BaseModel, ConfigDict
 
 
-@dataclass
-class CampaignRecord:
-    source: str
+class CampaignRecord(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
     date: date
-
-    platform_campaign_id: str | None
-
+    source: str
     campaign_name: str
 
-    impressions: int
-    clicks: int
-
-    cost: float
-
-    conversions: float
-    revenue: float
+    impressions: Optional[float] = None
+    clicks: Optional[float] = None
+    cost: Optional[float] = None
+    conversions: Optional[float] = None
+    revenue: Optional[float] = None

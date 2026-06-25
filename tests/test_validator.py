@@ -1,4 +1,7 @@
 from src.contracts.validator import validate_record
+from src.mappings.registry import SCHEMAS
+
+
 
 
 def test_valid_record():
@@ -15,10 +18,12 @@ def test_valid_record():
         "revenue": 100
     }
 
-    is_valid, errors = validate_record(valid_record)
+    schema = SCHEMAS["google_ads"]
+
+    is_valid, errors = validate_record(valid_record, schema)
 
     assert is_valid is True
-    assert errors is None
+    assert errors == []
 
 
 def test_missing_field():
@@ -27,14 +32,13 @@ def test_missing_field():
         "source": "google_ads"
     }
 
-    is_valid, errors = validate_record(invalid_record)
+    schema = SCHEMAS["google_ads"]
+    is_valid, errors = validate_record(invalid_record, schema)
 
     assert is_valid is False
     assert errors is not None
 
-    #error مربوط به فیلدهاست
-    error_fields = [e["loc"][0] for e in errors]
-
+    error_fields = [e.field for e in errors]
     assert "campaign_name" in error_fields
     assert "impressions" in error_fields
     assert "clicks" in error_fields

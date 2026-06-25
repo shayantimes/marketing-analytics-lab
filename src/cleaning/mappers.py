@@ -2,17 +2,11 @@ from typing import Dict
 from src.mappings.registry import MAPPINGS
 
 
-def map_row(row: Dict, mapping: Dict) -> Dict:
-    """
-    Convert raw platform row into canonical schema.
-    """
+def map_row(row, mapping):
+    result = {}
 
-    normalized = {}
+    for raw_key, canonical_key in mapping.items():
+        if raw_key in row:
+            result[canonical_key] = row[raw_key]
 
-    for raw_key, value in row.items():
-        canonical_key = mapping.get(raw_key)
-
-        if canonical_key:
-            normalized[canonical_key] = value
-
-    return normalized
+    return result

@@ -145,16 +145,15 @@ def process_row(
     # =========================
     # 6. RESULT
     # =========================
-    if is_valid and len(all_errors) == 0:
+    if is_valid and len(structured_errors) == 0:
         return {
             "valid": True,
             "data": cleaned,
-    }
+            "errors": []
+        }
 
     return {
         "valid": False,
-        "error": RowError(
-            row_index=row_index,
-            errors=all_errors,
-        )
-}
+        "data": None,
+        "errors": all_errors
+    }

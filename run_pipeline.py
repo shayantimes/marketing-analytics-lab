@@ -19,9 +19,10 @@ def run_test():
     for row in result["valid_rows"]:
         print(row)
 
-    print("\n--- ERRORS ---\n")
-    for err in result["errors"]:
-        print(err)
+    print("\n--- ERROR SUMMARY ---\n")
+
+    for error_type, count in result["error_summary"].items():
+        print(f"{error_type}: {count}")
 
 
 if __name__ == "__main__":
